@@ -33,7 +33,7 @@ class WarpResourceWrapper(object):
         siteTemplateDir = config['siteDir'].child("templates").path
         nodeTemplateDir = config['siteDir'].child("nodes").path    #NPK: the dir of the /nodes
         warpTemplateDir = self.warpTemplatePath.path
-        templateLookup.__init__(directories=[siteTemplateDir, warpTemplateDir, nodeTemplateDir], output_encoding="utf-8")
+        templateLookup.__init__(directories=[nodeTemplateDir, siteTemplateDir, warpTemplateDir], output_encoding="utf-8")
 
 
         self.dispatch =  {

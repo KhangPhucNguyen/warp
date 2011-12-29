@@ -88,7 +88,7 @@ def _getCrud(crudRenderer=None, objId=None):
         crud = crudRenderer.crudModel(obj)
     return crud
 
-def _getConentPath(request, filename):
+def _getContentPath(request, filename):
     #Get the node name
     nodeName = os.path.relpath(
                 os.path.dirname(request.node.__file__),
