@@ -8,6 +8,8 @@ from warp.runtime import store, templateLookup, config, exposedStormClasses
 
 import os.path
 
+import mako.exceptions
+
 
 def getNode(name):
 
@@ -70,35 +72,42 @@ def renderLocalTemplate(request, filename, **kw):
                           getLocalTemplatePath(request, filename),
                           **kw)
 
-def renderPartial(request, filename, **kw):
-"""NPK:
-This render method is used to render a content "filename" into the template /crud/wrapper.mak.
-"""
+def renderPartial(request, filename, crudRenderer=None, objId=None, **kw):
+    """NPK:
+    This render method is used to render a content "filename" into the template /crud/wrapper.mak.
+    Just name it as renderPartial, if it's good enough then we can apply it for the renderTemplate
+    """
+    return renderPartialTemplate(request, _getContentPath(request, filename), crud=_getCrud(crudRenderer, objId), **kw)
 
+def _getCrud(crudRenderer=None, objId=None):
     crud = None
     #Check if the crud renderer and the id of that object is pasted into this function
-    if 'crudRenderer' in kw and 'objId' in kw:
-        crudRenderer = kw['crudRenderer']
-        objID = int(kw['objId'])
-        obj = store.get(crudRenderer.model, objID)
+    if crudRenderer and objId:
+        objId = int(objId)
+        obj = store.get(crudRenderer.model, objId)
         crud = crudRenderer.crudModel(obj)
+    return crud
 
-    nodePath = getLocalTemplatePath(request, filename)
+def _getConentPath(request, filename):
     #Get the node name
     nodeName = os.path.relpath(
-        os.path.dirname(nodePath),
-        os.path.abspath("nodes"))
+                os.path.dirname(request.node.__file__),
+                os.path.abspath("nodes"))
     """
     a path from nodes directory to the filename (e.g /questionnaires/question.mak)
     in the directories of the templateLookup we already added the /nodes directory, so it will lookup the contentPath under /nodes
     """
     contentPath = '/%s/%s' % (nodeName, filename)
+    try:
+        templateLookup.get_template(contentPath)
+    except mako.exceptions.TemplateLookupException :
+        contentPath = '/'+filename
 
-    return renderPartialTemplate(request, contentPath, crud=crud, **kw)
+    return contentPath
 
 def renderPartialTemplate(request, templatePath, **kw):
     return renderTemplateObj(request,
-                             templateLookup.get_template('/crud/wrapper.mak'),
+                             templateLookup.get_template('/crud/blank_wrapper.mak'),
                              subTemplate=templatePath, **kw)
 
 def nodeSegments(node):
