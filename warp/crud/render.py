@@ -154,7 +154,13 @@ class CrudRenderer(object):
                                          crud=self.crudModel(obj),
                                          subTemplate="form.mak")
 
-
+    def get_crud(self, request):
+        #Check if the crud renderer and the id of that object is pasted into this function
+        objId = int(request.resource.args[0])
+        if objId:
+            obj = store.get(self.model, objId)
+            crud = self.crudModel(obj)
+            return crud
 
     def render_edit(self, request):
         objID = int(request.resource.args[0])
